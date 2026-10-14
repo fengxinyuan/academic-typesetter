@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Typesetter Studio - 学术文献智能翻译与出版排版系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dropzone-active {
+            border-color: #2563eb !important;
+            background-color: rgba(37, 99, 235, 0.04) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 头部导航 -->
+        <header class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold mb-3 border border-blue-200">
+                <span>⚡ 工业级公式哨兵防篡改 · MinerU 版面提取 · 出版级排版自愈</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Academic Typesetter <span class="text-blue-600">Studio</span>
+            </h1>
+            <p class="text-slate-500 mt-2 text-sm md:text-base max-w-2xl mx-auto">
+                通用学术论文与专著智能翻译工作台 · 公式零乱码 · 向量级 PDF 与双语对照
+            </p>
+        </header>
+
+        <!-- 核心交互区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- 左侧：参数与上传配置 -->
+            <div class="glass-card rounded-2xl p-6 lg:col-span-1 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> 任务配置
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">执行任务</label>
+                            <select id="taskSelect" class="w-full text-sm bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="translate">全自动翻译与出版排版 (Translate)</option>
+                                <option value="bilingual">中英并排双语对照 (Bilingual)</option>
+                                <option value="typeset">仅排版美化与公式自愈 (Typeset Only)</option>
+                                <option value="extract">仅 MinerU 提取为 Markdown (Extract)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">学术领域</label>
+                            <select id="domainSelect" class="w-full text-sm bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="academic">学术通用 (综合科技/社科)</option>
+                                <option value="math">理论数学 (强化定理/证明/矩阵卡片)</option>
+                                <option value="general">自然科学与技术报告</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">目标语言</label>
+                            <select id="langSelect" class="w-full text-sm bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="zh-CN">中文 (简体)</option>
+                                <option value="zh-TW">中文 (繁體)</option>
+                                <option value="en">English</option>
+                                <option value="ja">日本語</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-slate-100 text-xs text-slate-400">
+                    <p>💡 提示：本工作台自动调用本地 Chrome 生成带大纲的高清矢量 PDF，并支持断点秒级续跑。</p>
+                </div>
+            </div>
+
+            <!-- 右侧：拖拽上传与即时监控 -->
+            <div class="glass-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 上传文档
+                    </h2>
+
+                    <!-- 拖拽上传区 -->
+                    <div id="dropzone" class="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-50/20">
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.md">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-700" id="fileStatusText">点击或将 PDF / Markdown 文件拖放到此处</p>
+                        <p class="text-xs text-slate-400 mt-1">支持学术论文、教材专著、技术白皮书 (单篇或多页均可)</p>
+                    </div>
+                </div>
+
+                <!-- 操作按钮与状态指示 -->
+                <div class="mt-6">
+                    <button id="startBtn" disabled class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                        <span>🚀 启动智能流水线</span>
+                    </button>
+
+                    <div id="progressBox" class="mt-4 hidden">
+                        <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                            <span id="progressText">处理中...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 15%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 产物下载与双语预览区 -->
+        <div id="resultBox" class="glass-card rounded-2xl p-6 hidden">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> 成果物交付与预览
+            </h2>
+
+            <div class="flex flex-wrap gap-3 mb-6">
+                <a id="btnMd" href="#" target="_blank" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition-all">📖 下载 Markdown</a>
+                <a id="btnHtml" href="#" target="_blank" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-sm font-medium transition-all">🌐 打开独立 HTML 专著</a>
+                <a id="btnPdf" href="#" target="_blank" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-medium transition-all">📑 下载高清矢量 PDF</a>
+                <a id="btnBi" href="#" target="_blank" class="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-sm font-medium transition-all hidden">🪟 打开双语对照阅读器</a>
+            </div>
+
+            <div class="w-full h-96 border border-slate-200 rounded-xl overflow-hidden bg-white shadow-inner">
+                <iframe id="previewIframe" class="w-full h-full" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileStatusText = document.getElementById('fileStatusText');
+        const startBtn = document.getElementById('startBtn');
+        const progressBox = document.getElementById('progressBox');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+        const resultBox = document.getElementById('resultBox');
+
+        let selectedFile = null;
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dropzone-active'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dropzone-active'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dropzone-active');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            fileStatusText.textContent = `已就绪: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            startBtn.disabled = false;
+        }
+
+        startBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            startBtn.disabled = true;
+            progressBox.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            progressText.textContent = "正在上传文件并初始化...";
+            progressBar.style.width = "20%";
+
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            formData.append("task", document.getElementById('taskSelect').value);
+            formData.append("domain", document.getElementById('domainSelect').value);
+            formData.append("target_lang", document.getElementById('langSelect').value);
+
+            try {
+                const res = await fetch("/api/submit", { method: "POST", body: formData });
+                const data = await res.json();
+                pollStatus(data.doc_id);
+            } catch (err) {
+                progressText.textContent = "提交失败: " + err;
+                startBtn.disabled = false;
+            }
+        });
+
+        async function pollStatus(docId) {
+            const timer = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/status/${docId}`);
+                    const data = await res.json();
+
+                    if (data.status === "processing") {
+                        progressText.textContent = data.progress || "流水线处理中...";
+                        progressBar.style.width = "60%";
+                    } else if (data.status === "completed") {
+                        clearInterval(timer);
+                        progressBar.style.width = "100%";
+                        progressText.textContent = "全部完成！";
+                        showResults(data.files);
+                        startBtn.disabled = false;
+                    } else if (data.status === "failed") {
+                        clearInterval(timer);
+                        progressText.textContent = "处理出错: " + data.error;
+                        startBtn.disabled = false;
+                    }
+                } catch(e) {}
+            }, 3000);
+        }
+
+        function showResults(files) {
+            resultBox.classList.remove('hidden');
+            document.getElementById('btnMd').href = files.markdown;
+            document.getElementById('btnHtml').href = files.html;
+            document.getElementById('btnPdf').href = files.pdf;
+            
+            const btnBi = document.getElementById('btnBi');
+            if (files.bilingual) {
+                btnBi.href = files.bilingual;
+                btnBi.classList.remove('hidden');
+            } else {
+                btnBi.classList.add('hidden');
+            }
+
+            document.getElementById('previewIframe').src = files.html;
+        }
+    </script>
+</body>
+</html>
