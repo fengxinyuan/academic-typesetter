@@ -1,4 +1,4 @@
-﻿# ==========================================
+# ==========================================
 # 敏感凭据与密钥 (严禁上传 GitHub)
 # ==========================================
 .env
@@ -27,6 +27,11 @@ llm_pages_cache/
 test_20pages/
 pdf2zh_test/
 legacy_archive/
+.temp_pdf_chunks/
+scratch/
+output/
+uploads/
+final_output/
 *.zip
 *.tar.gz
 *.log
