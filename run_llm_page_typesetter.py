@@ -135,13 +135,14 @@ def merge_all_healed_pages():
     for f in all_files:
         healed_path = os.path.join(HEALED_PAGES_DIR, f)
         raw_path = os.path.join(RAW_PAGES_DIR, f)
+        target = healed_path if os.path.exists(healed_path) else raw_path
         if os.path.exists(healed_path):
-            with open(healed_path, 'r', encoding='utf-8') as p_file:
-                merged_pages.append(p_file.read().strip())
             cached_count += 1
-        elif os.path.exists(raw_path):
-            with open(raw_path, 'r', encoding='utf-8') as p_file:
-                merged_pages.append(p_file.read().strip())
+        with open(target, 'r', encoding='utf-8') as p_file:
+            c = p_file.read().strip()
+            c = re.sub(r'\n+---+\s*\n+\*{0,2}(附注|校正说明|公式语义校正|修改说明|排版说明)[\s\S]*$', '', c)
+            c = re.sub(r'\n+\*{0,2}(附注（公式语义校正说明）|【公式语义校正说明】)[\s\S]*$', '', c)
+            merged_pages.append(c)
                 
     full_md = "\n\n".join(merged_pages)
     with open(OUT_MD, 'w', encoding='utf-8') as f:
